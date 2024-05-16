@@ -61,7 +61,6 @@ def draw_window(surface, grid):
         (variables.TOP_LEFT_X, variables.TOP_LEFT_Y, variables.PLAY_WIDTH, variables.PLAY_HEIGHT), 
         4)
     draw_grid(surface, grid)
-    pygame.display.update()
 
 def valid_space(current_piece, grid):
     # Generate all empty positions
@@ -106,3 +105,24 @@ def check_lost(locked_positions):
         if y < 1:
             return True
     return False
+
+def draw_next_shape(shape, surface):
+    font = pygame.font.SysFont('comicsans', 30)
+    label = font.render("Next Shape", 1, (255,255,255))
+
+    sx = variables.TOP_LEFT_X + variables.PLAY_WIDTH + 50
+    sy = variables.TOP_LEFT_Y + variables.PLAY_HEIGHT / 2 - 100
+    format = shape.shape[shape.rotation % len(shape.shape)]
+
+    for i, line in enumerate(format):
+        row = list(line)
+        for j, column in enumerate(row):
+            if column == '0':
+                pygame.draw.rect(
+                    surface,
+                    shape.color,
+                    (sx + j * variables.BLOCK_SIZE, sy + i * variables.BLOCK_SIZE, variables.BLOCK_SIZE, variables.BLOCK_SIZE),
+                    0
+                )
+
+    surface.blit(label, (sx + 10, sy - 30))

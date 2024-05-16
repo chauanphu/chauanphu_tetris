@@ -85,7 +85,9 @@ def main(win):
                 change_piece = False
         if utils.check_lost(locked_positions):
             run = False
-            
+
         utils.draw_window(win, grid)
+        utils.draw_next_shape(next_piece, win)
+        pygame.display.update()
 
 main(screen)
