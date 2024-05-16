@@ -92,11 +92,28 @@ def main(win):
             change_piece = False
             score += utils.clear_rows(grid, locked_positions) * 10
 
-        if utils.check_lost(locked_positions):
-            run = False
 
         utils.draw_window(win, grid, score)
         utils.draw_next_shape(next_piece, win)
         pygame.display.update()
+        if utils.check_lost(locked_positions):
+            utils.draw_text_middle(win, "You Lost", 40, (255,255,255))
+            pygame.display.update()
+            pygame.time.delay(2000)
+            run = False
 
-main(screen)
+
+def main_menu(win):
+    run = True
+    while run:
+        win.fill((0,0,0))
+        utils.draw_text_middle(win, "Press any key to play", 60, (255,255,255))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                main(win)
+    pygame.display.quit()
+
+main_menu(screen)
