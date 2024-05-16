@@ -26,11 +26,26 @@ def main(win):
 
     change_piece = False
     run = True
-    current_piece = utils.get_shape(pieces.shape_list)
-    next_piece = utils.get_shape(pieces.shape_list)
+    current_piece = utils.get_shape()
+    next_piece = utils.get_shape()
     clock = pygame.time.Clock()
+    fall_time = 0
+    # The speed of the piece falling
+    fall_speed = 0.27
 
     while run:
+        grid = utils.create_grid(locked_positions)
+        fall_time += clock.get_rawtime()
+        clock.tick()
+
+        if fall_time / 1000 > fall_speed:
+            fall_time = 0
+            current_piece.y += 1
+            # If the piece hit the ground or another piece
+            if not (utils.valid_space(current_piece, grid)) and current_piece.y > 0:
+                current_piece.y -= 1
+                change_piece = True
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -52,5 +67,25 @@ def main(win):
                     current_piece.rotation += 1
                     if not (utils.valid_space(current_piece, grid)):
                         current_piece.rotation -= 1
+
+        shape_pos = utils.convert_shape_format(current_piece)
+
+        # Generate the piece on the grid
+        for i in range(len(shape_pos)):
+            x, y = shape_pos[i]
+            if y > -1:
+                grid[y][x] = current_piece.color
+
+        if change_piece:
+            for pos in shape_pos:
+                p = (pos[0], pos[1])
+                locked_positions[p] = current_piece.color
+                current_piece = next_piece
+                next_piece = utils.get_shape()
+                change_piece = False
+        if utils.check_lost(locked_positions):
+            run = False
+            
         utils.draw_window(win, grid)
 
+main(screen)
