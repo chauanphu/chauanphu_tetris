@@ -33,7 +33,7 @@ def main(win):
     # The speed of the piece falling
     fall_speed = 0.27
     level_time = 0
-    
+    score = 0
     while run:
         grid = utils.create_grid(locked_positions)
         fall_time += clock.get_rawtime()
@@ -90,12 +90,12 @@ def main(win):
             current_piece = next_piece
             next_piece = utils.get_shape()
             change_piece = False
-            utils.clear_rows(grid, locked_positions)
+            score += utils.clear_rows(grid, locked_positions) * 10
 
         if utils.check_lost(locked_positions):
             run = False
 
-        utils.draw_window(win, grid)
+        utils.draw_window(win, grid, score)
         utils.draw_next_shape(next_piece, win)
         pygame.display.update()
 

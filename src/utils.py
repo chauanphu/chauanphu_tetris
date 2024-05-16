@@ -42,12 +42,20 @@ def draw_grid(surface, grid):
             )
 
 
-def draw_window(surface, grid):
+def draw_window(surface, grid, score):
     surface.fill((0,0,0))
     pygame.font.init()
     font = pygame.font.SysFont("comicsans", 30)
     label = font.render("Tetris", 1, (255,255,255))
     surface.blit(label, (variables.TOP_LEFT_X + variables.PLAY_WIDTH / 2 - (label.get_width() / 2), 30))
+
+    # Display the score
+    font = pygame.font.SysFont("comicsans", 30)
+    label = font.render("Score: " + str(score), 1, (255,255,255))
+    sx = variables.TOP_LEFT_X + variables.PLAY_WIDTH + 50
+    sy = variables.TOP_LEFT_Y + variables.PLAY_HEIGHT / 2 - 100
+    surface.blit(label, (sx + 20, sy + 160))
+
     for y in range(len(grid)):
         for x in range(len(grid[y])):
             pygame.draw.rect(
@@ -149,3 +157,5 @@ def clear_rows(grid, locked):
             if y < ind:
                 newKey = (x, y + inc)
                 locked[newKey] = locked.pop(key)
+
+    return inc
