@@ -32,11 +32,18 @@ def main(win):
     fall_time = 0
     # The speed of the piece falling
     fall_speed = 0.27
-
+    level_time = 0
+    
     while run:
         grid = utils.create_grid(locked_positions)
         fall_time += clock.get_rawtime()
+        level_time += clock.get_rawtime()
         clock.tick()
+        if level_time / 1000 > 5:
+            level_time = 0
+            # The maximum speed of the piece falling is 0.12
+            if fall_speed > 0.12:
+                fall_speed -= 0.005
 
         if fall_time / 1000 > fall_speed:
             fall_time = 0
@@ -80,9 +87,11 @@ def main(win):
             for pos in shape_pos:
                 p = (pos[0], pos[1])
                 locked_positions[p] = current_piece.color
-                current_piece = next_piece
-                next_piece = utils.get_shape()
-                change_piece = False
+            current_piece = next_piece
+            next_piece = utils.get_shape()
+            change_piece = False
+            utils.clear_rows(grid, locked_positions)
+
         if utils.check_lost(locked_positions):
             run = False
 

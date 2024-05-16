@@ -126,3 +126,26 @@ def draw_next_shape(shape, surface):
                 )
 
     surface.blit(label, (sx + 10, sy - 30))
+
+# Shifting algorithm
+
+def clear_rows(grid, locked):
+    inc = 0
+    for i in range(len(grid) - 1, -1, -1):
+        row = grid[i]
+        if (0,0,0) not in row: # All the blocks are filled
+            inc += 1
+            # Add positions to remove
+            ind = i
+            for j in range(len(row)): # Iterate through each col
+                try:
+                    del locked[(j,i)] # Delete the block in the locked positions
+                except:
+                    continue
+    if inc > 0:
+        # Shift all the rows above the cleared row down by increasing the y value
+        for key in sorted(list(locked), key=lambda x: x[1])[::-1]: # Sorted the locked positions based on the y value, then reverse it
+            x, y = key
+            if y < ind:
+                newKey = (x, y + inc)
+                locked[newKey] = locked.pop(key)
