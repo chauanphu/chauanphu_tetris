@@ -77,12 +77,50 @@ def get_username(screen, playerQueue: PlayerQueue):
                 label = font.render(value, 1, (255, 255, 255))
                 screen.blit(label, (10, 140 + i * 50))
                 i += 1
+                if playerQueue.is_tail(currentPlayer):
+                    break
                 currentPlayer = currentPlayer.next
         # Render the start button
         pygame.draw.rect(screen, start_color, start_button)
         screen.blit(start_text, start_text_rect)
         pygame.display.flip()
     return True
+
+def leaderboard(screen, playerQueue: PlayerQueue):
+    screen.fill((0,0,0))
+    font = pygame.font.SysFont("comicsans", 30)
+    # Add a button called next
+    next_button = pygame.Rect(
+        variables.TOP_LEFT_X + variables.PLAY_WIDTH / 2 - 70,
+        variables.TOP_LEFT_Y + variables.PLAY_HEIGHT - 60,
+        140, 50)
+    
+    # Draw the leaderboard
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return None
+            if event.type == pygame.MOUSEBUTTONDOWN and next_button.collidepoint(pygame.mouse.get_pos()):
+                return True
+        # Render the leaderboard
+        i = 0
+        currentPlayer = playerQueue.peak_current()
+        
+        while currentPlayer is not None:
+            value = f"User {i+1}: {currentPlayer.get_username()} Score: {currentPlayer.get_score()}"
+            label = font.render(value, 1, (255, 255, 255))
+            screen.blit(label, (10, 140 + i * 50))
+            i += 1
+            if playerQueue.is_tail(currentPlayer):
+                break
+            currentPlayer = currentPlayer.next
+        # Render the next button
+        pygame.draw.rect(screen, (0, 0, 255), next_button)
+        next_text = font.render('Next', True, (255, 255, 255))
+        next_text_rect = next_text.get_rect(center=next_button.center)
+        screen.blit(next_text, next_text_rect)
+
+        pygame.display.flip()
 
 def single_game(win, player: Player | None = None) -> int | None:
     locked_positions = {}
@@ -181,12 +219,13 @@ def multi_game(win, playerQueue: PlayerQueue):
         draw_text_middle(win, f"Current player: {currentPlayer.get_username()}", 30, (255,255,255))
         pygame.display.update()
         pygame.time.delay(2000)
-
         score = single_game(win, currentPlayer)
         if score == None:
             return None
         playerQueue.head.increase_score(score)
         playerQueue.next_player()
+        if leaderboard(win, playerQueue) == None:
+            return None
 
 def waiting_lobby(screen):
     font = pygame.font.SysFont("comicsans", 30)
