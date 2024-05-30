@@ -1,24 +1,19 @@
 import pygame
 from pygame.locals import *
 import os
+import pages 
 import variables
 import utils
-import pieces
 
 # GLOBAL VARIABLES
-FPS = 60
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.join(ROOT_DIR)
-IMAGE_DIR = os.path.join(ROOT_DIR, "asset", "images")
 
 pygame.init()
 screen = pygame.display.set_mode((variables.WIDTH, variables.HEIGHT))
 
 # Set the title of the window and the icon
 pygame.display.set_caption("Tetris")
-icon = pygame.image.load(os.path.join(IMAGE_DIR, "tetris_icon.png"))
+icon = pygame.image.load(os.path.join(variables.IMAGE_DIR, "tetris_icon.png"))
 pygame.display.set_icon(icon)
-
 
 def main(win):
     locked_positions = {}
@@ -97,21 +92,32 @@ def main(win):
         utils.draw_next_shape(next_piece, win)
         pygame.display.update()
         if utils.check_lost(locked_positions):
-            utils.draw_text_middle(win, "You Lost", 40, (255,255,255))
+            pages.draw_text_middle(win, "You Lost", 40, (255,255,255))
             pygame.display.update()
             pygame.time.delay(2000)
             run = False
 
-
 def main_menu(win):
-    run = True
-    while run:
+    while True:
         win.fill((0,0,0))
-        utils.draw_text_middle(win, "Press any key to play", 60, (255,255,255))
+        # 1. Draw the waiting screen: Selecting solo or multiplayer
+        mode = pages.waiting_lobby(win)
+        if mode == None:
+            break
+        # 2. If solo, start the game
+        if mode == "solo":
+            pages.draw_text_middle(win, "Press any key to play", 60, (255,255,255))
+            main(win)   
+            continue
+        # 2.b If multiplayer, wait for another player to join
+        elif mode == "multiplayer":
+            users = pages.get_username(win)
+        if users == None:
+            break
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                break
             if event.type == pygame.KEYDOWN:
                 main(win)
     pygame.display.quit()
