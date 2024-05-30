@@ -159,8 +159,3 @@ def clear_rows(grid, locked):
                 locked[newKey] = locked.pop(key)
 
     return inc
-
-def draw_text_middle(surface, text, size, color):
-    font = pygame.font.SysFont("comicsans", size, bold=True)
-    label = font.render(text, 1, color)
-    surface.blit(label, (variables.TOP_LEFT_X + variables.PLAY_WIDTH / 2 - (label.get_width() / 2), variables.TOP_LEFT_Y + variables.PLAY_HEIGHT / 2 - label.get_height() / 2))
