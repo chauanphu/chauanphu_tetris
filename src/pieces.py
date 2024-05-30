@@ -152,7 +152,6 @@ class Player():
     
 class PlayerQueue():
     def __init__(self):
-        self.queue = []
         self.head = None
         self.tail = None
 
@@ -163,12 +162,13 @@ class PlayerQueue():
         else:
             self.tail.next = player
             self.tail = player
+            self.tail.next = self.head
+
+    def is_tail(self, player: Player) -> bool:
+        return player == self.tail
 
     def peak_current(self) -> Player:
         return self.head
-    
-    def get_queue(self) -> list[Player]:
-        return self.queue
     
     def next_player(self) -> Player:
         if self.head == None:

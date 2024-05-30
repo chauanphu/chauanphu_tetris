@@ -30,7 +30,8 @@ def main_menu(win):
             continue
         # 2.b If multiplayer, wait for another player to join
         elif mode == "multiplayer":
-            pages.get_username(win, userQueue)
+            if pages.get_username(win, userQueue) == None:
+                continue
             status = pages.multi_game(win, userQueue)
             if status == None:
                 break
