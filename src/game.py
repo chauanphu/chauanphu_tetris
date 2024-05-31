@@ -6,6 +6,7 @@ class Timer:
         self.repeated = repeated
         self.duration = duration
         self.function = function
+        self.start_time = 0
         self.time = 0
         self.active = False
 
@@ -37,6 +38,7 @@ class Game:
         self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
         self.timers = {
             "gravity": Timer(600, True, self.move_down),
+            "horizontal move": Timer(200)
         }
         self.timers["gravity"].activate()
 
@@ -44,8 +46,22 @@ class Game:
         for timer in self.timers.values():
             timer.update()
 
+    def move_horizontal(self, direction):
+        self.tetro.move_horizontal(direction)
+
     def move_down(self):
-            self.tetro.move_down()
+        self.tetro.move_down()
+
+    def input(self):
+        keys = pygame.key.get_pressed()
+        
+        if not self.timers['horizontal move'].active:
+            if keys[pygame.K_LEFT]:
+                self.move_horizontal(-1)
+                self.timers['horizontal move'].activate()
+            if keys[pygame.K_RIGHT]:
+                self.move_horizontal(1)
+                self.timers['horizontal move'].activate()
 
     def draw_score(self):
         score_section = pygame.Surface((SIZE_BAR_WIDTH, GAME_HEIGHT * SCORE_HEIGHT_SECTION - PADDING))
@@ -68,6 +84,9 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return None
+                
+            # Input
+            self.input()    
             # Update timers
             self.timer_update()
             self.sprites.update()
@@ -112,6 +131,10 @@ class Tetromino:
     def move_down(self):
         for block in self.blocks:
             block.pos.y += 1
+
+    def move_horizontal(self, direction):
+        for block in self.blocks:
+            block.pos.x += direction
 
     def rotate(self):
         self.rotation = (self.rotation + 1) % 4
