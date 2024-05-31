@@ -1,6 +1,8 @@
 from pieces import Player
 from variables import *
 from random import choice
+import numpy as np
+
 class Timer:
     def __init__(self, duration, repeated = False, function=None):
         self.repeated = repeated
@@ -37,9 +39,10 @@ class Game:
         # Test
         self.new_tetromino()
         self.timers = {
-            "gravity": Timer(600, True, self.move_down),
+            "gravity": Timer(300, True, self.move_down),
             "horizontal move": Timer(200),
-            "vertical move": Timer(200)
+            "vertical move": Timer(200),
+            "rotation": Timer(200),
         }
         self.timers["gravity"].activate()
 
@@ -55,20 +58,24 @@ class Game:
     def remove_row(self, row):
         for col in range(COLUMNS):
             self.blocked_positions[(col, row)].kill()
-            self.blocked_positions.pop((col, row))
+            del self.blocked_positions[(col, row)]
         
     def move_down_blocks(self, row):
-        for col in range(COLUMNS):
-            for block in self.blocked_positions.values():
-                if block.pos.y < row:
-                    block.pos.y += 1
+        new_blocked_positions = {}
+
+        for block in self.blocked_positions.values():
+            if block.pos.y < row:
+                block.pos.y += 1
+
+            new_blocked_positions[(block.pos.x, block.pos.y)] = block
+        self.blocked_positions = new_blocked_positions
 
     def timer_update(self):
         for timer in self.timers.values():
             timer.update()
 
     def new_tetromino(self):
-        self.tetro = Tetromino("O", self.sprites)
+        self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
 
     def move_horizontal(self, direction):
         self.tetro.move_horizontal(self.blocked_positions, direction)
@@ -94,6 +101,10 @@ class Game:
             if keys[pygame.K_DOWN]:
                 self.move_down()
                 self.timers['vertical move'].activate()
+        if not self.timers['rotation'].active:
+            if keys[pygame.K_UP]:
+                self.tetro.rotate()
+                self.timers['rotation'].activate()
 
     def draw_score(self):
         score_section = pygame.Surface((SIZE_BAR_WIDTH, GAME_HEIGHT * SCORE_HEIGHT_SECTION - PADDING))
@@ -171,9 +182,10 @@ class Block(pygame.sprite.Sprite):
 class Tetromino:
     def __init__(self, shape, group):
         super().__init__()
+        self.shape = shape
         self.block_positions = TETROMINO[shape]['shape']
         self.color = TETROMINO[shape]['color']
-        self.blocks = [Block(group, pos, self.color) for pos in self.block_positions]
+        self.blocks = [Block(group, (pos[0] + COLUMNS // 2, pos[1]), self.color) for pos in self.block_positions]
         self.rotation = 0
         # State
         self.active = True
@@ -198,5 +210,11 @@ class Tetromino:
         collision_list = [block.vertical_collision(blocked_positions) for block in self.blocks]
         return any(collision_list)
 
-    def rotate(self):
-        self.rotation = (self.rotation + 1) % 4
+    def rotate(self, degrees = 90):
+        if self.shape == "O":
+            return
+        pivot_point = self.blocks[0].pos
+        for block in self.blocks:
+            relative_pos = block.pos - pivot_point
+            rotated_pos = pygame.Vector2(relative_pos.y, -relative_pos.x)
+            block.pos = rotated_pos + pivot_point
