@@ -103,7 +103,7 @@ class Game:
                 self.timers['vertical move'].activate()
         if not self.timers['rotation'].active:
             if keys[pygame.K_UP]:
-                self.tetro.rotate()
+                self.tetro.rotate(self.blocked_positions)
                 self.timers['rotation'].activate()
 
     def draw_score(self):
@@ -210,11 +210,30 @@ class Tetromino:
         collision_list = [block.vertical_collision(blocked_positions) for block in self.blocks]
         return any(collision_list)
 
-    def rotate(self, degrees = 90):
+    def check_rotation_collision(self, blocked_positions):
+        pivot_point = self.blocks[0].pos
+        for block in self.blocks:
+            testpos = pygame.Vector2(block.pos)
+            relative_pos = testpos - pivot_point
+            rotated_pos = relative_pos.rotate(90)
+            updated_pos = rotated_pos + pivot_point
+            if not 0 <= updated_pos.x < COLUMNS or not 0 <= updated_pos.y < ROWS:
+                return True
+            if (updated_pos.x, updated_pos.y) in blocked_positions:
+                return True
+        return False
+
+    def rotate(self, blocked_positions):
         if self.shape == "O":
             return
         pivot_point = self.blocks[0].pos
+        # Make a copy of the blocks
+    
+        if self.check_rotation_collision(blocked_positions):
+            return
+
         for block in self.blocks:
             relative_pos = block.pos - pivot_point
-            rotated_pos = pygame.Vector2(relative_pos.y, -relative_pos.x)
-            block.pos = rotated_pos + pivot_point
+            rotated_pos = relative_pos.rotate(90)
+            updated_pos = rotated_pos + pivot_point
+            block.pos = updated_pos
