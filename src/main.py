@@ -46,7 +46,6 @@ class Main:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
-                    break
 if __name__ == "__main__":
     main = Main()
     main.run_game()
