@@ -35,22 +35,32 @@ class Game:
         self.sprites = pygame.sprite.Group()
 
         # Test
-        self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
+        self.new_tetromino()
         self.timers = {
             "gravity": Timer(600, True, self.move_down),
-            "horizontal move": Timer(200)
+            "horizontal move": Timer(200),
+            "vertical move": Timer(200)
         }
         self.timers["gravity"].activate()
+
+        # Blocked grid
+        self.blocked_positions = []
 
     def timer_update(self):
         for timer in self.timers.values():
             timer.update()
 
+    def new_tetromino(self):
+        self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
+
     def move_horizontal(self, direction):
-        self.tetro.move_horizontal(direction)
+        self.tetro.move_horizontal(self.blocked_positions, direction)
 
     def move_down(self):
-        self.tetro.move_down()
+        self.tetro.move_down(self.blocked_positions)
+        if not self.tetro.active:
+            self.blocked_positions.extend([(block.pos.x, block.pos.y) for block in self.tetro.blocks])
+            self.new_tetromino()
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -62,6 +72,10 @@ class Game:
             if keys[pygame.K_RIGHT]:
                 self.move_horizontal(1)
                 self.timers['horizontal move'].activate()
+        if not self.timers['vertical move'].active:
+            if keys[pygame.K_DOWN]:
+                self.move_down()
+                self.timers['vertical move'].activate()
 
     def draw_score(self):
         score_section = pygame.Surface((SIZE_BAR_WIDTH, GAME_HEIGHT * SCORE_HEIGHT_SECTION - PADDING))
@@ -110,6 +124,8 @@ class Block(pygame.sprite.Sprite):
         super().__init__(group)
         self.image = pygame.Surface((CELL_SIZE, CELL_SIZE))
         self.image.fill(color)
+
+        # Position
         self.pos = pygame.Vector2(pos)
         x = self.pos.x * CELL_SIZE
         y = self.pos.y * CELL_SIZE
@@ -120,13 +136,17 @@ class Block(pygame.sprite.Sprite):
         y = self.pos.y * CELL_SIZE
         self.rect = self.image.get_rect(topleft=(x, y))
 
-    def horizontal_collision(self, direction):
+    def horizontal_collision(self, blocked_positions, direction):
         if not 0 <= self.pos.x + direction < COLUMNS:
+            return True
+        if (self.pos.x + direction, self.pos.y) in blocked_positions:
             return True
         return False
         
-    def vertical_collision(self):
+    def vertical_collision(self, blocked_positions):
         if not self.pos.y + 1 < ROWS:
+            return True
+        if (self.pos.x, self.pos.y + 1) in blocked_positions:
             return True
         return False
     
@@ -137,23 +157,27 @@ class Tetromino:
         self.color = TETROMINO[shape]['color']
         self.blocks = [Block(group, pos, self.color) for pos in self.block_positions]
         self.rotation = 0
+        # State
+        self.active = True
 
-    def move_down(self):
-        if not self.check_vertical_collision():
+    def move_down(self, blocked_positions):
+        if not self.check_vertical_collision(blocked_positions):
             for block in self.blocks:
                 block.pos.y += 1
+        else:
+            self.active = False
 
-    def move_horizontal(self, direction):
-        if not self.check_horizontal_collision(direction):
+    def move_horizontal(self, blocked_positions, direction):
+        if not self.check_horizontal_collision(blocked_positions, direction):
             for block in self.blocks:
                 block.pos.x += direction
     
-    def check_horizontal_collision(self, direction):
-        collision_list = [block.horizontal_collision(direction) for block in self.blocks]
+    def check_horizontal_collision(self, blocked_positions, direction):
+        collision_list = [block.horizontal_collision(blocked_positions, direction) for block in self.blocks]
         return any(collision_list)
 
-    def check_vertical_collision(self):
-        collision_list = [block.vertical_collision() for block in self.blocks]
+    def check_vertical_collision(self, blocked_positions):
+        collision_list = [block.vertical_collision(blocked_positions) for block in self.blocks]
         return any(collision_list)
 
     def rotate(self):
