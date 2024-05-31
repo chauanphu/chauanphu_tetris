@@ -119,7 +119,17 @@ class Block(pygame.sprite.Sprite):
         x = self.pos.x * CELL_SIZE
         y = self.pos.y * CELL_SIZE
         self.rect = self.image.get_rect(topleft=(x, y))
+
+    def horizontal_collision(self, direction):
+        if not 0 <= self.pos.x + direction < COLUMNS:
+            return True
+        return False
         
+    def vertical_collision(self):
+        if not self.pos.y + 1 < ROWS:
+            return True
+        return False
+    
 class Tetromino:
     def __init__(self, shape, group):
         super().__init__()
@@ -129,12 +139,22 @@ class Tetromino:
         self.rotation = 0
 
     def move_down(self):
-        for block in self.blocks:
-            block.pos.y += 1
+        if not self.check_vertical_collision():
+            for block in self.blocks:
+                block.pos.y += 1
 
     def move_horizontal(self, direction):
-        for block in self.blocks:
-            block.pos.x += direction
+        if not self.check_horizontal_collision(direction):
+            for block in self.blocks:
+                block.pos.x += direction
+    
+    def check_horizontal_collision(self, direction):
+        collision_list = [block.horizontal_collision(direction) for block in self.blocks]
+        return any(collision_list)
+
+    def check_vertical_collision(self):
+        collision_list = [block.vertical_collision() for block in self.blocks]
+        return any(collision_list)
 
     def rotate(self):
         self.rotation = (self.rotation + 1) % 4
