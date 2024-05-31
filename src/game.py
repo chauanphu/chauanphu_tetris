@@ -44,14 +44,31 @@ class Game:
         self.timers["gravity"].activate()
 
         # Blocked grid
-        self.blocked_positions = []
+        self.blocked_positions = {}
+
+    def check_full_row(self):
+        for row in range(ROWS):
+            if all((col, row) in self.blocked_positions for col in range(COLUMNS)):
+                self.remove_row(row)
+                self.move_down_blocks(row)
+
+    def remove_row(self, row):
+        for col in range(COLUMNS):
+            self.blocked_positions[(col, row)].kill()
+            self.blocked_positions.pop((col, row))
+        
+    def move_down_blocks(self, row):
+        for col in range(COLUMNS):
+            for block in self.blocked_positions.values():
+                if block.pos.y < row:
+                    block.pos.y += 1
 
     def timer_update(self):
         for timer in self.timers.values():
             timer.update()
 
     def new_tetromino(self):
-        self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
+        self.tetro = Tetromino("O", self.sprites)
 
     def move_horizontal(self, direction):
         self.tetro.move_horizontal(self.blocked_positions, direction)
@@ -59,7 +76,8 @@ class Game:
     def move_down(self):
         self.tetro.move_down(self.blocked_positions)
         if not self.tetro.active:
-            self.blocked_positions.extend([(block.pos.x, block.pos.y) for block in self.tetro.blocks])
+            self.blocked_positions.update({(block.pos.x, block.pos.y): block for block in self.tetro.blocks})
+            self.check_full_row()
             self.new_tetromino()
 
     def input(self):
