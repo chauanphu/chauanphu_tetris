@@ -4,7 +4,6 @@ import os
 import pages 
 from pieces import PlayerQueue
 import variables
-import utils
 from sys import exit
 import game
 

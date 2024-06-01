@@ -2,7 +2,6 @@ import os
 import pygame
 from pieces import Player, PlayerQueue
 import variables
-import utils
 import game
 
 def draw_text_middle(surface, text, size, color):
