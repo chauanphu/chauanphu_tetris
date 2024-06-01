@@ -8,14 +8,17 @@ def draw_text_middle(surface, text, size, color):
     surface.fill((0,0,0))
     font = pygame.font.SysFont("comicsans", size, bold=True)
     label = font.render(text, 1, color)
-    surface.blit(label, (variables.TOP_LEFT_X + variables.PLAY_WIDTH / 2 - (label.get_width() / 2), variables.TOP_LEFT_Y + variables.PLAY_HEIGHT / 2 - label.get_height() / 2))
+    surface.blit(
+        label, 
+        (variables.PADDING + variables.WIDTH / 2 - label.get_width() / 2, 
+         variables.PADDING + variables.HEIGHT / 2 - label.get_height() / 2))
 
 def get_username(screen, playerQueue: PlayerQueue):
     font = pygame.font.SysFont("comicsans", 30)
     # Add a button called start
     start_button = pygame.Rect(
-        variables.TOP_LEFT_X + variables.PLAY_WIDTH / 2 - 70,
-        variables.TOP_LEFT_Y + variables.PLAY_HEIGHT - 60,
+       variables.PADDING + variables.WIDTH / 2 - 70,
+        variables.PADDING + variables.HEIGHT / 2 - 60,
         140, 50)
     
     start_color = pygame.Color('dodgerblue2')
@@ -91,8 +94,8 @@ def leaderboard(screen, playerQueue: PlayerQueue):
     font = pygame.font.SysFont("comicsans", 30)
     # Add a button called next
     next_button = pygame.Rect(
-        variables.TOP_LEFT_X + variables.PLAY_WIDTH / 2 - 70,
-        variables.TOP_LEFT_Y + variables.PLAY_HEIGHT - 60,
+        variables.PADDING + variables.WIDTH / 2 - 70,
+        variables.PADDING + variables.HEIGHT / 2 - 60,
         140, 50)
     
     # Draw the leaderboard
@@ -136,8 +139,8 @@ def multi_game(win, playerQueue: PlayerQueue):
         draw_text_middle(win, f"Current player: {currentPlayer.get_username()}", 30, (255,255,255))
         pygame.display.update()
         pygame.time.delay(2000)
-        multile_game = game.Game()
-        score = multile_game.run(currentPlayer)
+        multile_game = game.Game(currentPlayer)
+        score = multile_game.run()
         if score == None:
             return None
         playerQueue.head.increase_score(score)

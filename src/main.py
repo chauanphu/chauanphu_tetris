@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 import os
 import pages 
-from pieces import PlayerQueue
+from pieces import Player, PlayerQueue
 import variables
 from sys import exit
 import game
@@ -28,8 +28,11 @@ class Main:
                 break
             # 2. If solo, start the game
             if mode == "solo":
-                singleGame = game.Game()
-                singleGame.run()
+                player = Player("Player 1")
+                singleGame = game.Game(player)
+                score = singleGame.run()
+                pages.draw_text_middle(self.screen, f"Score: {score}", 30, (255,255,255))
+                pygame.time.delay(2000)
                 continue
             # 2.b If multiplayer, wait for another player to join
             elif mode == "multiplayer":

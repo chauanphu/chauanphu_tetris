@@ -50,20 +50,42 @@ class Preview:
             y = i * self.fragment_height + (self.fragment_height - surface.get_height()) // 2
             self.surface.blit(surface, (x, y))
 
+class Score:
+    def __init__(self):
+        self.surface = pygame.Surface((SIZE_BAR_WIDTH, GAME_HEIGHT * SCORE_HEIGHT_SECTION - PADDING))
+        self.rect = self.surface.get_rect(bottomright=(WIDTH - PADDING, HEIGHT - PADDING))
+        self.display_surface = pygame.display.get_surface()
+    
+    def draw(self, score=0, level=0, lines=0):
+        self.surface.fill(BLACK)
+        font = pygame.font.Font(None, 36)
+        score_text = font.render(f"Score: {score}", True, WHITE)
+        level_text = font.render(f"Level: {level}", True, WHITE)
+        lines_text = font.render(f"Lines: {lines}", True, WHITE)
+        self.surface.blit(score_text, (10, 10))
+        self.surface.blit(level_text, (10, 50))
+        self.surface.blit(lines_text, (10, 90))
 
+        self.display_surface.blit(self.surface, self.rect)
 
 class Game:
-    def __init__(self):
+    def __init__(self, player: Player):
         self.win = pygame.display.get_surface()
         self.surface = pygame.Surface((GAME_WIDTH, GAME_HEIGHT))
         self.sprites = pygame.sprite.Group()
-
+        self.player = player
         # Setting up tetromino
         self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
         self.next_shapes = [choice(list(TETROMINO.keys())) for _ in range(3)]
         self.preview = Preview(self.next_shapes)
 
+        # Setting up score
+        self.score_section = Score()
+
         # Setting up game behaviours
+        self.drop_speed = 300
+        self.drop_speed_increase = 50
+        self.drop_speed_limit = 100
         self.timers = {
             "gravity": Timer(300, True, self.move_down),
             "horizontal move": Timer(200),
@@ -71,18 +93,16 @@ class Game:
             "rotation": Timer(200),
         }
         self.timers["gravity"].activate()
-
+        self.active = True
         # Blocked grid
         self.blocked_positions = {}
-
-        # Get next shapes
-        print(self.next_shapes)
 
     def check_full_row(self):
         for row in range(ROWS):
             if all((col, row) in self.blocked_positions for col in range(COLUMNS)):
                 self.remove_row(row)
                 self.move_down_blocks(row)
+                self.player.score += 10
 
     def remove_row(self, row):
         for col in range(COLUMNS):
@@ -104,6 +124,9 @@ class Game:
             timer.update()
 
     def new_tetromino(self):
+        if self.check_lost():
+            self.active = False
+            return
         new_tetro = Tetromino(self.next_shapes.pop(0), self.sprites)
         self.tetro = new_tetro
         self.next_shapes.append(choice(list(TETROMINO.keys())))
@@ -138,10 +161,6 @@ class Game:
                 self.tetro.rotate(self.blocked_positions)
                 self.timers['rotation'].activate()
 
-    def draw_score(self):
-        score_section = pygame.Surface((SIZE_BAR_WIDTH, GAME_HEIGHT * SCORE_HEIGHT_SECTION - PADDING))
-        self.win.blit(score_section, (GAME_WIDTH + PADDING * 2, GAME_HEIGHT * PREVIEW_HEIGHT_SECTION + PADDING * 2))
-
     def draw_grid(self):
         for col in range(1, COLUMNS):
             x = col * CELL_SIZE
@@ -150,12 +169,18 @@ class Game:
             y = row * CELL_SIZE
             pygame.draw.line(self.surface, DARKGRAY, (0, y), (GAME_WIDTH, y))
 
-    def run(self, player: Player | None = None) -> int | None:
-        while True:
+    def check_lost(self):
+        for block in self.tetro.blocks:
+            if block.pos.y < 1:
+                return True
+        return False
+
+    def run(self) -> int | None:
+        while self.active:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return None
-                
+
             # Input
             self.input()    
             # Update timers
@@ -171,7 +196,8 @@ class Game:
             # Draw the preview section
             self.draw_grid()
             self.preview.draw()
-            self.draw_score()
+            self.score_section.draw(score=self.player.score)
 
             self.win.blit(self.surface, (PADDING,PADDING))
             pygame.display.update()
+        return self.player.score
