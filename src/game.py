@@ -59,7 +59,7 @@ class Game:
         self.sprites = pygame.sprite.Group()
 
         # Setting up tetromino
-        self.new_tetromino()
+        self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
         self.next_shapes = [choice(list(TETROMINO.keys())) for _ in range(3)]
         self.preview = Preview(self.next_shapes)
 
@@ -104,7 +104,10 @@ class Game:
             timer.update()
 
     def new_tetromino(self):
-        self.tetro = Tetromino(choice(list(TETROMINO.keys())), self.sprites)
+        new_tetro = Tetromino(self.next_shapes.pop(0), self.sprites)
+        self.tetro = new_tetro
+        self.next_shapes.append(choice(list(TETROMINO.keys())))
+        self.preview.next_shapes = self.next_shapes
 
     def move_horizontal(self, direction):
         self.tetro.move_horizontal(self.blocked_positions, direction)
