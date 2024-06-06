@@ -143,7 +143,7 @@ def multi_game(win, playerQueue: PlayerQueue):
         score = multile_game.run()
         if score == None:
             return None
-        playerQueue.head.increase_score(score)
+        playerQueue.head.set_score(score)
         playerQueue.next_player()
         if leaderboard(win, playerQueue) == None:
             return None

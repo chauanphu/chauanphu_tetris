@@ -111,6 +111,7 @@ class Game:
                 self.move_down_blocks(row)
                 self.player.increase_score()
                 self.player.increase_level()
+            self.cal_gravity()
         self.player.end_series()
 
     def remove_row(self, row):
@@ -189,7 +190,6 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return None
-            self.cal_gravity()
             # Input
             self.input()    
             # Update timers
