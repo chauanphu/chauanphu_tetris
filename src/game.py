@@ -100,9 +100,12 @@ class Game:
     def check_full_row(self):
         for row in range(ROWS):
             if all((col, row) in self.blocked_positions for col in range(COLUMNS)):
+                self.player.increase_lines()
                 self.remove_row(row)
                 self.move_down_blocks(row)
-                self.player.score += 10
+                self.player.increase_score()
+                self.player.increase_level()
+        self.player.end_series()
 
     def remove_row(self, row):
         for col in range(COLUMNS):
@@ -196,8 +199,11 @@ class Game:
             # Draw the preview section
             self.draw_grid()
             self.preview.draw()
-            self.score_section.draw(score=self.player.score)
+            self.score_section.draw(
+                score=self.player.get_score(), 
+                level=self.player.level, 
+                lines=self.player.previousLines)
 
             self.win.blit(self.surface, (PADDING,PADDING))
             pygame.display.update()
-        return self.player.score
+        return self.player.get_score()
