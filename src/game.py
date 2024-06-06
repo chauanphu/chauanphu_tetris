@@ -83,13 +83,13 @@ class Game:
         self.score_section = Score()
 
         # Setting up game behaviours
-        self.drop_speed = 300
+        self.initial_drop_speed = 300
         self.drop_speed_increase = 50
         self.drop_speed_limit = 100
         self.timers = {
             "gravity": Timer(300, True, self.move_down),
             "horizontal move": Timer(200),
-            "vertical move": Timer(200),
+            "vertical move": Timer(100),
             "rotation": Timer(200),
         }
         self.timers["gravity"].activate()
@@ -97,12 +97,22 @@ class Game:
         # Blocked grid
         self.blocked_positions = {}
 
+    def cal_gravity(self):
+        drop_speed = max(
+            self.initial_drop_speed - self.drop_speed_increase * (self.player.level - 1), 
+            self.drop_speed_limit)
+        self.timers["gravity"].duration = drop_speed
+
     def check_full_row(self):
         for row in range(ROWS):
             if all((col, row) in self.blocked_positions for col in range(COLUMNS)):
+                self.player.increase_lines()
                 self.remove_row(row)
                 self.move_down_blocks(row)
-                self.player.score += 10
+                self.player.increase_score()
+                self.player.increase_level()
+            self.cal_gravity()
+        self.player.end_series()
 
     def remove_row(self, row):
         for col in range(COLUMNS):
@@ -180,7 +190,6 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return None
-
             # Input
             self.input()    
             # Update timers
@@ -196,8 +205,11 @@ class Game:
             # Draw the preview section
             self.draw_grid()
             self.preview.draw()
-            self.score_section.draw(score=self.player.score)
+            self.score_section.draw(
+                score=self.player.get_score(), 
+                level=self.player.level, 
+                lines=self.player.previousLines)
 
             self.win.blit(self.surface, (PADDING,PADDING))
             pygame.display.update()
-        return self.player.score
+        return self.player.get_score()

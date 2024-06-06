@@ -7,6 +7,10 @@ class Player():
         self.username = name
         self.score = 0
         self.next = None
+        self.level = 1
+        self.lines = 0
+        self.inSeries = False
+        self.previousLines = 0
 
     def get_score(self):
         return self.score
@@ -20,11 +24,30 @@ class Player():
     def set_username(self, username):
         self.username = username
 
-    def increase_score(self, score):
-        self.score += score
+    def increase_score(self):
+        self.score += 10 * self.lines 
+
+    def get_lines(self):
+        return self.lines
+    
+    def increase_lines(self):
+        if not self.inSeries:
+            self.lines = 0
+            self.inSeries = True
+        self.lines += 1
+    
+    def end_series(self):
+        if self.inSeries:
+            self.inSeries = False
+            self.previousLines = self.lines
+
+    def increase_level(self):
+        level = self.score // 100 + 1
+        if level > self.level:
+            self.level = level
 
     def reset_score(self):
-        self.score = 0
+        self.score = self.lines * 10
     
 class PlayerQueue():
     def __init__(self):
