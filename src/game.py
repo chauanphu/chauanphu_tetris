@@ -83,7 +83,7 @@ class Game:
         self.score_section = Score()
 
         # Setting up game behaviours
-        self.drop_speed = 300
+        self.initial_drop_speed = 300
         self.drop_speed_increase = 50
         self.drop_speed_limit = 100
         self.timers = {
@@ -96,6 +96,12 @@ class Game:
         self.active = True
         # Blocked grid
         self.blocked_positions = {}
+
+    def cal_gravity(self):
+        drop_speed = max(
+            self.initial_drop_speed - self.drop_speed_increase * (self.player.level - 1), 
+            self.drop_speed_limit)
+        self.timers["gravity"].duration = drop_speed
 
     def check_full_row(self):
         for row in range(ROWS):
@@ -183,7 +189,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return None
-
+            self.cal_gravity()
             # Input
             self.input()    
             # Update timers
