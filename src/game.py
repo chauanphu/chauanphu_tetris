@@ -89,7 +89,7 @@ class Game:
         self.timers = {
             "gravity": Timer(300, True, self.move_down),
             "horizontal move": Timer(200),
-            "vertical move": Timer(200),
+            "vertical move": Timer(100),
             "rotation": Timer(200),
         }
         self.timers["gravity"].activate()
