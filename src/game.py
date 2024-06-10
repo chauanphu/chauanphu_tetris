@@ -1,4 +1,9 @@
-from pieces import Player, Tetromino, TetrominoQueue
+"""
+Name: 
+Member names & IU code: Châu An Phú - ITDSIU22158
+Purpose: A tetris game with single and multiplayer mode
+"""
+from pieces import Player, Tetromino
 from variables import *
 from random import choice
 

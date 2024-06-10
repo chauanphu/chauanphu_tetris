@@ -1,3 +1,8 @@
+"""
+Name: 
+Member names & IU code: Châu An Phú - ITDSIU22158
+Purpose: A tetris game with single and multiplayer mode
+"""
 import os
 import pygame
 from pieces import Player, PlayerQueue
