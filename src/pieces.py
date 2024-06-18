@@ -124,7 +124,6 @@ class Tetromino:
         self.block_positions = TETROMINO[shape]['shape']
         self.color = TETROMINO[shape]['color']
         self.blocks = [Block(group, (pos[0] + COLUMNS // 2, pos[1]), self.color) for pos in self.block_positions]
-        self.rotation = 0
         # State
         self.active = True
         self.next = None

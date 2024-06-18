@@ -11,7 +11,7 @@
 ## Usage
 
 1. Navigate to the project directory: `cd src`
-2. Run the game: `python main.py`
+2. Run the game: `python3 -m main`
 
 ## Controls
 
@@ -19,14 +19,14 @@
     - Single player
     - Multiple player
 
-- For single player:
+2.1 For single player:
   - The tetrominos will drop gradually and stacking up. If they reach the top, you will loose.
   - For each blocks that form a filled row, it will pop out, prevend you from getting to your demise (for now).
   - You can use the "◀️" and "▶️" to move the tetrominos horizontally.
   - 🔼 button does not move tetromino up but instead rotates it.
   - And if you can see the tetrominos fall not quickly enough, you can speed it up by pressing 🔽
 
-- For multiple player:
+2.2 For multiple player:
   - The game logic would basically the same. However, you can create multiple users and compete with your friends for mastery of this game.
 
 ## Contributing
